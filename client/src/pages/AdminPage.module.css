@@ -1,0 +1,464 @@
+/* ── 로그인 ── */
+.loginWrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  gap: 12px;
+}
+
+.loginTitle {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  color: var(--gold);
+}
+
+.loginSub {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
+}
+
+.loginInput {
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+}
+
+.loginInput:focus { border-color: var(--gold); }
+
+.loginError { font-size: 13px; color: var(--danger); }
+
+.loginBtn {
+  padding: 14px;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.loginBtn:hover { opacity: 0.85; }
+
+/* ── 패널 ── */
+.panel {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.panelTitle {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  color: var(--gold);
+}
+
+.tabs { display: flex; gap: 8px; }
+
+.tab {
+  padding: 8px 20px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover { border-color: var(--gold); color: var(--text); }
+
+.tabActive {
+  background: var(--gold) !important;
+  color: #000 !important;
+  border-color: var(--gold) !important;
+  font-weight: 600;
+}
+
+.content {
+  padding: 32px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── 상단 바 ── */
+.topBar {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dateWrap, .candidateSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dateInput, .select {
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+}
+
+.dateInput:focus, .select:focus { border-color: var(--gold); }
+
+.resetBtn {
+  padding: 8px 14px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: all 0.2s;
+}
+
+.resetBtn:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ── 에디터 ── */
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comboBadge {
+  padding: 10px 16px;
+  background: rgba(29,157,217,0.08);
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.comboBadge strong { color: var(--blue); }
+
+.comboHint { font-size: 12px; margin-left: 8px; }
+
+.qBlock {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qNum {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.removeBtn, .removeOptBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.removeBtn:hover, .removeOptBtn:hover { color: var(--danger); }
+
+.qInput {
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.qInput:focus { border-color: var(--gold); }
+.qInputEn { font-size: 13px; color: var(--text-muted); }
+
+.options { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+.optRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.optX { opacity: 0.5; }
+
+.optCode {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--gold);
+  min-width: 20px;
+  font-size: 15px;
+}
+
+.optFixed {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.optInput {
+  flex: 1;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.optInput:focus { border-color: var(--gold); }
+.optInputEn { font-size: 12px; color: var(--text-muted); }
+
+.addOptBtn {
+  font-size: 13px;
+  color: var(--blue);
+  background: none;
+  border: 1px dashed var(--blue);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-self: flex-start;
+}
+
+.addOptBtn:hover { background: rgba(29,157,217,0.08); }
+
+.addQBtn {
+  padding: 12px;
+  background: none;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addQBtn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── 설정 ── */
+.settingsRow {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.settingItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.numInput {
+  width: 90px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+  text-align: center;
+}
+
+.numInput:focus { border-color: var(--gold); }
+
+.settingHint { font-size: 12px; color: var(--text-muted); }
+
+.capacityPreview {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.capacityPreview strong {
+  font-size: 18px;
+  color: var(--blue);
+  font-weight: 700;
+}
+
+/* ── 액션 ── */
+.statusMsg {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.statusOk { background: rgba(56,161,105,0.12); color: var(--success); }
+.statusErr { background: rgba(229,62,62,0.1); color: var(--danger); }
+
+.actionRow {
+  display: flex;
+  gap: 12px;
+}
+
+.saveBtn {
+  padding: 14px 28px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveBtn:hover { border-color: var(--gold); color: var(--gold); }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.approveBtn {
+  flex: 1;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #2d7a2d, #1e5c1e);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 20px rgba(56,161,105,0.25);
+}
+
+.approveBtn:hover { box-shadow: 0 0 32px rgba(56,161,105,0.4); }
+.approveBtn:disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg-card2); box-shadow: none; }
+
+.approveNote {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── 대시보드 ── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.statCard {
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  padding: 10px 16px;
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.table tr:hover td { background: var(--bg-card); }
+
+.loading {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 40px 0;
+  text-align: center;
+}

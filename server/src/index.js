@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 const sessionRoutes = require('./routes/session');
 const roomRoutes = require('./routes/room');
 const nicknameRoutes = require('./routes/nickname');
+const adminRoutes = require('./routes/admin');
 const registerSocketHandlers = require('./socket/handlers');
 const { startRedisSubscriber } = require('./redis/subscriber');
 
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use('/api/session', sessionRoutes);
 app.use('/api/room', roomRoutes);
 app.use('/api/nickname', nicknameRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 

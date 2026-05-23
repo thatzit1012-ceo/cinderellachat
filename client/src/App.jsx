@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import QuestionPage from './pages/QuestionPage';
 import NicknamePage from './pages/NicknamePage';
 import ChatRoomPage from './pages/ChatRoomPage';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/questions" element={<QuestionPage />} />
         <Route path="/nickname" element={<NicknamePage />} />
         <Route path="/chat" element={<ChatRoomPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );
