@@ -7,6 +7,7 @@ const sessionRoutes = require('./routes/session');
 const roomRoutes = require('./routes/room');
 const nicknameRoutes = require('./routes/nickname');
 const registerSocketHandlers = require('./socket/handlers');
+const { startRedisSubscriber } = require('./redis/subscriber');
 
 const app = express();
 const server = http.createServer(app);
@@ -28,6 +29,7 @@ app.use('/api/nickname', nicknameRoutes);
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 registerSocketHandlers(io);
+startRedisSubscriber(io);
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
