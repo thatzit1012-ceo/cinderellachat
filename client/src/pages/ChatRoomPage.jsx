@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useServiceState } from '../hooks/useServiceState';
 import { useSocket } from '../hooks/useSocket';
@@ -10,38 +10,52 @@ export default function ChatRoomPage() {
   const { remaining } = useServiceState();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [users, setUsers] = useState([]);
   const [isWatching, setIsWatching] = useState(false);
+  const [roomCount, setRoomCount] = useState({ currentCount: 0, maxCount: 5 });
   const [ended, setEnded] = useState(false);
   const bottomRef = useRef(null);
 
-  const nickname = sessionStorage.getItem('cc_nickname') || '';
-  const userToken = sessionStorage.getItem('cc_token') || '';
-  const roomInfo = JSON.parse(sessionStorage.getItem('cc_room') || '{}');
+  const nickname  = sessionStorage.getItem('cc_nickname') || '';
+  const userToken = sessionStorage.getItem('cc_token')    || '';
+  const roomInfo  = JSON.parse(sessionStorage.getItem('cc_room') || '{}');
 
   useEffect(() => {
-    if (!nickname || !userToken || !roomInfo.roomId) {
-      navigate('/');
-    }
-    setIsWatching(roomInfo.status === 'watching' || roomInfo.currentCount >= roomInfo.maxCount);
+    if (!nickname || !userToken || !roomInfo.roomId) navigate('/');
   }, []);
 
-  // 자정 강제 종료
   useEffect(() => {
-    if (remaining <= 0) {
-      setEnded(true);
-    }
+    if (remaining <= 0) setEnded(true);
   }, [remaining]);
 
+  const addSystemMsg = useCallback((content) => {
+    setMessages((prev) => [...prev, { id: Date.now() + Math.random(), system: true, content }]);
+  }, []);
+
   const { sendMessage } = useSocket({
-    roomId: roomInfo.roomId,
+    roomId:   roomInfo.roomId,
     userToken,
     nickname,
+    onHistory: ({ history, isWatching: watching }) => {
+      setMessages(history.map((m) => ({
+        id: m.message_id,
+        nickname: m.nickname,
+        content: m.content,
+        createdAt: m.created_at,
+        isWhisper: m.is_whisper,
+      })));
+      setIsWatching(watching);
+    },
     onMessage: (msg) => setMessages((prev) => [...prev, msg]),
-    onUserJoined: ({ nickname: n }) =>
-      setMessages((prev) => [...prev, { id: Date.now(), system: true, content: `${n}님이 입장했습니다.` }]),
+    onUserJoined: ({ nickname: n, isWatching: w }) =>
+      addSystemMsg(`${n}님이 ${w ? '대기자로 ' : ''}입장했습니다.`),
     onUserLeft: ({ nickname: n }) =>
-      setMessages((prev) => [...prev, { id: Date.now(), system: true, content: `${n}님이 퇴장했습니다.` }]),
+      addSystemMsg(`${n}님이 퇴장했습니다.`),
+    onWatcherPromoted: ({ nickname: n }) => {
+      addSystemMsg(`${n}님이 대기에서 참여자로 전환됐습니다.`);
+      if (n === nickname) setIsWatching(false);
+    },
+    onCountUpdated: ({ currentCount, maxCount }) =>
+      setRoomCount({ currentCount, maxCount }),
     onMidnight: () => setEnded(true),
   });
 
@@ -51,7 +65,6 @@ export default function ChatRoomPage() {
 
   const handleSend = () => {
     if (!input.trim() || isWatching) return;
-    if (input.length > 140) return;
     sendMessage(input.trim());
     setInput('');
   };
@@ -80,6 +93,9 @@ export default function ChatRoomPage() {
       <div className={styles.roomHeader}>
         <div className={styles.roomMeta}>
           <span className={styles.roomNick}>🎭 {nickname}</span>
+          <span className={styles.roomCount}>
+            {roomCount.currentCount} / {roomCount.maxCount}명
+          </span>
           {isWatching && <span className={styles.watchingBadge}>대기 중 (보기 전용)</span>}
         </div>
         <button className={styles.leaveBtn} onClick={() => navigate('/')}>퇴장</button>
@@ -87,7 +103,7 @@ export default function ChatRoomPage() {
 
       <div className={styles.messages}>
         {messages.length === 0 && (
-          <p className={styles.empty}>아직 메시지가 없습니다. 첫 번째로 말을 걸어보세요.</p>
+          <p className={styles.empty}>첫 번째로 말을 걸어보세요.</p>
         )}
         {messages.map((msg) =>
           msg.system ? (
@@ -95,14 +111,15 @@ export default function ChatRoomPage() {
           ) : (
             <div
               key={msg.id}
-              className={`${styles.message} ${msg.nickname === nickname ? styles.mine : styles.theirs}`}
+              className={`${styles.message} ${msg.nickname === nickname ? styles.mine : styles.theirs} ${msg.isWhisper ? styles.whisper : ''}`}
             >
               {msg.nickname !== nickname && (
-                <span className={styles.msgNick}>{msg.nickname}</span>
+                <span className={styles.msgNick}>{msg.nickname}{msg.isWhisper ? ' 🤫' : ''}</span>
               )}
               <div className={styles.bubble}>{msg.content}</div>
               <span className={styles.msgTime}>
                 {new Date(msg.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                {msg.isWhisper && <span className={styles.whisperLabel}> 귓속말</span>}
               </span>
             </div>
           )
@@ -112,12 +129,12 @@ export default function ChatRoomPage() {
 
       <div className={`${styles.inputArea} ${isWatching ? styles.watchingInput : ''}`}>
         {isWatching ? (
-          <p className={styles.watchingNote}>대기 중에는 메시지를 보낼 수 없습니다.</p>
+          <p className={styles.watchingNote}>대기 중에는 메시지를 보낼 수 없습니다. 자리가 나면 자동으로 참여자로 전환됩니다.</p>
         ) : (
           <>
             <textarea
               className={styles.textInput}
-              placeholder="메시지 입력... (최대 140자)"
+              placeholder="메시지 입력... (최대 140자, Enter로 전송)"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -125,7 +142,7 @@ export default function ChatRoomPage() {
               rows={2}
             />
             <div className={styles.inputFooter}>
-              <span className={styles.charCount}>{input.length}/140</span>
+              <span className={styles.charCount}>{input.length} / 140</span>
               <button
                 className={`${styles.sendBtn} ${input.trim() ? styles.sendActive : ''}`}
                 onClick={handleSend}

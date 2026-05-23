@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const { getKSTDateString, getServiceState } = require('../utils/time');
-const { DEFAULT_QUESTIONS } = require('../db/defaultQuestions');
+const { getTodayQuestions } = require('../db/queries');
 
 // GET /api/session/today
-// 오늘 서비스 상태 + 질문 세트 반환
-router.get('/today', (req, res) => {
-  const { state, remaining } = getServiceState();
-  const date = getKSTDateString();
-
-  // TODO: DB에서 오늘 승인된 질문 세트 조회, 없으면 DEFAULT_QUESTIONS 사용
-  const questions = DEFAULT_QUESTIONS;
-
-  res.json({ date, state, remaining, questions });
+router.get('/today', async (req, res) => {
+  try {
+    const { state, remaining } = getServiceState();
+    const date = getKSTDateString();
+    const questions = await getTodayQuestions();
+    res.json({ date, state, remaining, questions });
+  } catch (err) {
+    console.error('session/today error:', err.message);
+    res.status(500).json({ error: 'server_error' });
+  }
 });
 
 module.exports = router;
