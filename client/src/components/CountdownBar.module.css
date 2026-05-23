@@ -1,0 +1,56 @@
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--gold);
+  font-size: 13px;
+  font-family: var(--font-sans);
+}
+
+.danger {
+  border-bottom-color: var(--danger);
+  animation: pulse-border 1s infinite;
+}
+
+.critical {
+  animation: pulse-border 0.4s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-bottom-color: var(--danger); }
+  50% { border-bottom-color: transparent; }
+}
+
+.icon { color: var(--gold); font-size: 16px; }
+
+.text { flex: 1; color: var(--text-muted); }
+
+.clock {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  letter-spacing: 0.1em;
+}
+
+.danger .clock { color: var(--danger); }
+
+.warn {
+  background: var(--danger);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

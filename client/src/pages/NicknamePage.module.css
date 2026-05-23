@@ -1,0 +1,130 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 40px 20px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.back {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.back:hover { color: var(--text); }
+
+.top { display: flex; flex-direction: column; gap: 8px; }
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.inputWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input {
+  padding: 16px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 18px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--font-sans);
+}
+
+.input:focus { border-color: var(--gold); }
+
+.statusMsg {
+  font-size: 13px;
+  min-height: 18px;
+  padding-left: 4px;
+}
+
+.available { color: var(--success); }
+.taken, .invalid { color: var(--danger); }
+.checking { color: var(--text-muted); }
+
+.roomPreview {
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.roomLabel {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.roomInfo { font-size: 14px; color: var(--text-muted); }
+.roomInfo strong { color: var(--text); }
+
+.watchingNotice {
+  font-size: 13px;
+  color: var(--gold);
+  margin-top: 4px;
+}
+
+.enterBtn {
+  padding: 18px;
+  border-radius: 8px;
+  font-size: 17px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.active {
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+  color: white;
+  box-shadow: 0 0 24px rgba(29,157,217,0.3);
+}
+
+.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 36px rgba(29,157,217,0.45);
+}
+
+.inactive {
+  background: var(--bg-card2);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border: 1px solid var(--border);
+}
