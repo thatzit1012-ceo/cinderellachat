@@ -2,19 +2,29 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(29,157,217,0.08) 0%, transparent 70%),
-              radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.06) 0%, transparent 60%),
-              var(--bg);
+  background: var(--bg);
 }
 
-.content {
+/* ── Hero ─────────────────────────────────────────── */
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(29,157,217,0.10) 0%, transparent 65%),
+    radial-gradient(ellipse at 85% 85%, rgba(201,168,76,0.08) 0%, transparent 55%),
+    var(--bg);
+  position: relative;
+}
+
+.heroContent {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 28px;
   max-width: 480px;
   width: 100%;
 }
@@ -23,22 +33,24 @@
 
 .title {
   font-family: var(--font-serif);
-  font-size: 42px;
+  font-size: 48px;
   font-weight: 700;
   color: var(--gold);
   letter-spacing: 0.04em;
+  line-height: 1.1;
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
-  letter-spacing: 0.2em;
-  margin-top: 4px;
+  letter-spacing: 0.24em;
+  margin-top: 6px;
+  text-transform: uppercase;
 }
 
 .tagline {
   font-family: var(--font-serif);
-  font-size: 16px;
+  font-size: 17px;
   color: var(--text-muted);
   letter-spacing: 0.08em;
   text-align: center;
@@ -54,18 +66,18 @@
   letter-spacing: 0.08em;
   cursor: pointer;
   border: none;
-  transition: all 0.2s;
+  transition: all 0.25s;
 }
 
 .active {
   background: linear-gradient(135deg, var(--blue), var(--blue-dark));
   color: white;
-  box-shadow: 0 0 24px rgba(29,157,217,0.3);
+  box-shadow: 0 0 28px rgba(29,157,217,0.35);
 }
 
 .active:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 36px rgba(29,157,217,0.45);
+  box-shadow: 0 0 40px rgba(29,157,217,0.5);
 }
 
 .disabled {
@@ -82,10 +94,323 @@
   line-height: 1.6;
 }
 
+.scrollDown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  margin-top: 8px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  animation: bounce 2.4s ease-in-out infinite;
+}
+
+.scrollDown:hover { opacity: 1; }
+
+.scrollIcon {
+  font-size: 18px;
+  display: block;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
+}
+
+/* ── 공통 섹션 ────────────────────────────────────── */
+
+.section {
+  padding: 80px 20px;
+}
+
+.sectionDark {
+  background: var(--bg-card);
+}
+
+.sectionInner {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.sectionEyebrow {
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-top: -24px;
+}
+
+/* ── 서비스 소개 ──────────────────────────────────── */
+
+.introText {
+  font-size: 16px;
+  color: var(--text-muted);
+  line-height: 2;
+  text-align: center;
+  max-width: 640px;
+}
+
+.introText strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.introBadges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.badge {
+  font-size: 13px;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  background: var(--bg-card2);
+  white-space: nowrap;
+}
+
+/* ── 특징 그리드 ─────────────────────────────────── */
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+.featureCard {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.featureCard:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+}
+
+.featureIcon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.featureTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.featureDesc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── 이용 방법 ───────────────────────────────────── */
+
+.steps {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.stepLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 48px;
+}
+
+.stepNum {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(201,168,76,0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepLine {
+  width: 1px;
+  flex: 1;
+  min-height: 32px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  opacity: 0.3;
+  margin: 6px 0;
+}
+
+.stepBody {
+  padding-bottom: 36px;
+  padding-top: 10px;
+}
+
+.stepTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.stepDesc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ── 규칙 ────────────────────────────────────────── */
+
+.rules {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ruleItem {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 20px;
+  background: var(--bg-card2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.ruleIcon {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 16px;
+  text-align: center;
+}
+
+.ruleItem p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+.ruleItem p strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── CTA ─────────────────────────────────────────── */
+
+.ctaSection {
+  padding: 80px 20px;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.07) 0%, transparent 70%),
+    var(--bg);
+  text-align: center;
+}
+
+.ctaTitle {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.ctaDesc {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  line-height: 1.7;
+}
+
+.ctaBtn {
+  max-width: 360px;
+}
+
+/* ── Footer ──────────────────────────────────────── */
+
 .footer {
-  margin-top: auto;
-  padding-top: 40px;
+  padding: 40px 20px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footerLogo {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.footerSub {
   font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.footerCopy {
+  font-size: 11px;
   color: var(--border);
-  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+/* ── 반응형 (모바일) ──────────────────────────────── */
+
+@media (max-width: 600px) {
+  .title { font-size: 36px; }
+
+  .sectionTitle { font-size: 26px; }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .section { padding: 60px 16px; }
+
+  .ctaSection { padding: 60px 16px; }
+
+  .ctaTitle { font-size: 26px; }
 }
