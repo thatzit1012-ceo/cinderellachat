@@ -20,6 +20,6 @@ jobs:
             cd /var/www/cinderellachat
             git pull origin main
             cd server && npm install --omit=dev && cd ..
-            cd client && npm install --omit=dev && npm run build && cd ..
+            cd client && npm install && npm run build && cd ..
             pm2 restart cinderellachat-server
             sudo nginx -t && sudo systemctl reload nginx
