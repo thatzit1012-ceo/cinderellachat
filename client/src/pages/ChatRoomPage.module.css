@@ -144,7 +144,272 @@
   background: var(--bg);
   border-radius: 4px;
   border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
 }
+
+.roomCount:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.roomCountActive {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(29,157,217,0.08);
+}
+
+.hostBadge {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(29,157,217,0.15);
+  color: var(--blue);
+  border-radius: 4px;
+  border: 1px solid var(--blue);
+  font-weight: 600;
+}
+
+/* 참여자 패널 */
+.usersPanel {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.usersPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+}
+
+.closeBtn:hover { color: var(--text); }
+
+.userRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 8px;
+}
+
+.userRow:last-child { border-bottom: none; }
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.userNick {
+  font-size: 14px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userBadges {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.hostTag {
+  font-size: 10px;
+  padding: 1px 5px;
+  background: rgba(29,157,217,0.15);
+  color: var(--blue);
+  border-radius: 3px;
+  border: 1px solid var(--blue);
+}
+
+.watchTag {
+  font-size: 10px;
+  padding: 1px 5px;
+  background: rgba(201,168,76,0.12);
+  color: var(--gold);
+  border-radius: 3px;
+  border: 1px solid var(--gold);
+}
+
+.meTag {
+  font-size: 10px;
+  padding: 1px 5px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-muted);
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.userActions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.whisperBtn {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.whisperBtn:hover {
+  background: rgba(201,168,76,0.25);
+}
+
+.kickBtn {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: rgba(220,50,50,0.08);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kickBtn:hover {
+  background: rgba(220,50,50,0.2);
+}
+
+/* 모달 오버레이 */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+/* 귓속말 모달 */
+.whisperModal {
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.whisperModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.whisperCount {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.whisperTextarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-sans);
+  padding: 10px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.whisperTextarea:focus { border-color: var(--gold); }
+
+.whisperModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* 강퇴 확인 모달 */
+.confirmModal {
+  background: var(--bg-card);
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirmText {
+  font-size: 15px;
+  color: var(--text);
+  text-align: center;
+}
+
+.confirmBtns {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancelBtn {
+  padding: 8px 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover { border-color: var(--text-muted); color: var(--text); }
+
+.kickConfirmBtn {
+  padding: 8px 20px;
+  background: rgba(220,50,50,0.12);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kickConfirmBtn:hover { background: rgba(220,50,50,0.25); }
 
 .inputArea {
   border-top: 1px solid var(--border);

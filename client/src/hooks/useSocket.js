@@ -3,7 +3,12 @@ import { io } from 'socket.io-client';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000';
 
-export function useSocket({ roomId, userToken, nickname, onHistory, onMessage, onUserJoined, onUserLeft, onWatcherPromoted, onCountUpdated, onMidnight }) {
+export function useSocket({
+  roomId, userToken, nickname,
+  onHistory, onMessage, onUserJoined, onUserLeft,
+  onWatcherPromoted, onCountUpdated, onMidnight,
+  onUsersList, onKicked,
+}) {
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -22,6 +27,8 @@ export function useSocket({ roomId, userToken, nickname, onHistory, onMessage, o
     socket.on('room:watcher_promoted', onWatcherPromoted);
     socket.on('room:count_updated',    onCountUpdated);
     socket.on('midnight:close',        onMidnight);
+    socket.on('room:users',            onUsersList);
+    socket.on('room:kicked',           onKicked);
 
     return () => {
       socket.emit('room:leave');
@@ -33,9 +40,13 @@ export function useSocket({ roomId, userToken, nickname, onHistory, onMessage, o
     socketRef.current?.emit('message:send', { content });
   }, []);
 
-  const sendWhisper = useCallback((targetSocketId, targetToken, content) => {
-    socketRef.current?.emit('whisper:send', { targetSocketId, targetToken, content });
+  const sendWhisper = useCallback((targetSocketId, content) => {
+    socketRef.current?.emit('whisper:send', { targetSocketId, content });
   }, []);
 
-  return { sendMessage, sendWhisper };
+  const sendKick = useCallback((targetSocketId) => {
+    socketRef.current?.emit('room:kick', { targetSocketId });
+  }, []);
+
+  return { sendMessage, sendWhisper, sendKick };
 }

@@ -16,8 +16,23 @@ const {
 } = require('../db/queries');
 const { getKSTDateString } = require('../utils/time');
 
-// socketId → { userToken, roomId, nickname } 매핑 (메모리)
+// socketId → { userToken, roomId, nickname, isWatching } 매핑 (메모리)
 const socketMap = new Map();
+
+async function broadcastRoomUsers(io, roomId) {
+  const users = [];
+  for (const [sid, ctx] of socketMap.entries()) {
+    if (ctx.roomId === roomId) {
+      users.push({ socketId: sid, nickname: ctx.nickname, isWatching: ctx.isWatching });
+    }
+  }
+  const host = await getHostOfRoom(roomId);
+  const result = users.map(u => ({
+    ...u,
+    isHost: !u.isWatching && host?.nickname === u.nickname,
+  }));
+  io.to(roomId).emit('room:users', result);
+}
 
 function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
@@ -37,7 +52,7 @@ function registerSocketHandlers(io) {
           await incrementRoomCount(roomId);
         }
 
-        socketMap.set(socket.id, { userToken, roomId, nickname });
+        socketMap.set(socket.id, { userToken, roomId, nickname, isWatching });
         socket.join(roomId);
 
         // 입장한 유저에게 최근 메시지 전달
@@ -53,6 +68,8 @@ function registerSocketHandlers(io) {
           currentCount: updatedRoom.current_count,
           maxCount: updatedRoom.max_count,
         });
+
+        await broadcastRoomUsers(io, roomId);
       } catch (err) {
         console.error('room:join error:', err.message);
         socket.emit('error', { message: 'join_failed' });
@@ -88,7 +105,7 @@ function registerSocketHandlers(io) {
     });
 
     // ── 귓속말 ─────────────────────────────────────────────
-    socket.on('whisper:send', async ({ targetSocketId, targetToken, content }) => {
+    socket.on('whisper:send', async ({ targetSocketId, content }) => {
       try {
         const ctx = socketMap.get(socket.id);
         if (!ctx) return;
@@ -96,6 +113,9 @@ function registerSocketHandlers(io) {
         const { userToken, roomId, nickname } = ctx;
         const user = await getUserByToken(userToken);
         if (!user || user.status !== 'active') return;
+
+        const targetCtx = socketMap.get(targetSocketId);
+        if (!targetCtx || targetCtx.roomId !== roomId) return;
 
         const whisperCount = await incrementWhisperCount(userToken);
         if (whisperCount > 5) {
@@ -106,9 +126,8 @@ function registerSocketHandlers(io) {
         const trimmed = content?.trim().slice(0, 140);
         if (!trimmed) return;
 
-        await saveMessage(roomId, userToken, nickname, trimmed, true, targetToken);
+        await saveMessage(roomId, userToken, nickname, trimmed, true, targetCtx.userToken);
 
-        // 보낸 사람 + 받는 사람에게만 전송
         const whisperMsg = {
           id: Date.now().toString(),
           nickname,
@@ -118,9 +137,32 @@ function registerSocketHandlers(io) {
           remainingCount: 5 - whisperCount,
         };
         socket.emit('whisper:receive', whisperMsg);
-        socket.to(targetSocketId).emit('whisper:receive', { ...whisperMsg, from: nickname });
+        io.to(targetSocketId).emit('whisper:receive', { ...whisperMsg, from: nickname });
       } catch (err) {
         console.error('whisper:send error:', err.message);
+      }
+    });
+
+    // ── 방장 강퇴 ──────────────────────────────────────────
+    socket.on('room:kick', async ({ targetSocketId }) => {
+      try {
+        const ctx = socketMap.get(socket.id);
+        if (!ctx) return;
+
+        const { userToken, roomId, nickname } = ctx;
+        const host = await getHostOfRoom(roomId);
+        if (host?.user_token !== userToken) {
+          socket.emit('error', { message: 'not_host' });
+          return;
+        }
+
+        const targetCtx = socketMap.get(targetSocketId);
+        if (!targetCtx || targetCtx.roomId !== roomId) return;
+        if (targetSocketId === socket.id) return;
+
+        io.to(targetSocketId).emit('room:kicked', { by: nickname });
+      } catch (err) {
+        console.error('room:kick error:', err.message);
       }
     });
 
@@ -162,6 +204,14 @@ async function handleLeave(socket, io) {
       if (watcher) {
         await promoteWatcher(watcher.user_token);
         await incrementRoomCount(roomId);
+
+        for (const [sid, sctx] of socketMap.entries()) {
+          if (sctx.userToken === watcher.user_token) {
+            socketMap.set(sid, { ...sctx, isWatching: false });
+            break;
+          }
+        }
+
         io.to(roomId).emit('room:watcher_promoted', { nickname: watcher.nickname });
       }
     }
@@ -175,6 +225,8 @@ async function handleLeave(socket, io) {
         maxCount: updatedRoom.max_count,
       });
     }
+
+    await broadcastRoomUsers(io, roomId);
   } catch (err) {
     console.error('handleLeave error:', err.message);
   }

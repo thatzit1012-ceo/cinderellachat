@@ -13,6 +13,13 @@ export default function ChatRoomPage() {
   const [isWatching, setIsWatching] = useState(false);
   const [roomCount, setRoomCount] = useState({ currentCount: 0, maxCount: 5 });
   const [ended, setEnded] = useState(false);
+  const [roomUsers, setRoomUsers] = useState([]);
+  const [showUsers, setShowUsers] = useState(false);
+  const [whisperTarget, setWhisperTarget] = useState(null);
+  const [whisperInput, setWhisperInput] = useState('');
+  const [whisperRemaining, setWhisperRemaining] = useState(5);
+  const [kicked, setKicked] = useState(false);
+  const [kickConfirm, setKickConfirm] = useState(null);
   const bottomRef = useRef(null);
 
   const nickname  = sessionStorage.getItem('cc_nickname') || '';
@@ -31,7 +38,7 @@ export default function ChatRoomPage() {
     setMessages((prev) => [...prev, { id: Date.now() + Math.random(), system: true, content }]);
   }, []);
 
-  const { sendMessage } = useSocket({
+  const { sendMessage, sendWhisper, sendKick } = useSocket({
     roomId:   roomInfo.roomId,
     userToken,
     nickname,
@@ -45,7 +52,12 @@ export default function ChatRoomPage() {
       })));
       setIsWatching(watching);
     },
-    onMessage: (msg) => setMessages((prev) => [...prev, msg]),
+    onMessage: (msg) => {
+      if (msg.isWhisper && msg.remainingCount !== undefined) {
+        setWhisperRemaining(msg.remainingCount);
+      }
+      setMessages((prev) => [...prev, msg]);
+    },
     onUserJoined: ({ nickname: n, isWatching: w }) =>
       addSystemMsg(`${n}님이 ${w ? '대기자로 ' : ''}입장했습니다.`),
     onUserLeft: ({ nickname: n }) =>
@@ -57,6 +69,8 @@ export default function ChatRoomPage() {
     onCountUpdated: ({ currentCount, maxCount }) =>
       setRoomCount({ currentCount, maxCount }),
     onMidnight: () => setEnded(true),
+    onUsersList: (users) => setRoomUsers(users),
+    onKicked: () => setKicked(true),
   });
 
   useEffect(() => {
@@ -76,6 +90,43 @@ export default function ChatRoomPage() {
     }
   };
 
+  const handleWhisperOpen = (user) => {
+    setWhisperTarget(user);
+    setWhisperInput('');
+  };
+
+  const handleWhisperSend = () => {
+    if (!whisperInput.trim() || !whisperTarget) return;
+    sendWhisper(whisperTarget.socketId, whisperInput.trim());
+    addSystemMsg(`귓속말을 ${whisperTarget.nickname}님께 보냈습니다. (남은 횟수: ${whisperRemaining - 1}회)`);
+    setWhisperTarget(null);
+    setWhisperInput('');
+  };
+
+  const handleKick = (user) => {
+    setKickConfirm(user);
+  };
+
+  const confirmKick = () => {
+    if (!kickConfirm) return;
+    sendKick(kickConfirm.socketId);
+    addSystemMsg(`${kickConfirm.nickname}님을 강퇴했습니다.`);
+    setKickConfirm(null);
+  };
+
+  const myInfo = roomUsers.find((u) => u.nickname === nickname);
+  const isHost = myInfo?.isHost || false;
+
+  if (kicked) {
+    return (
+      <div className={styles.ended}>
+        <h2 className={styles.endedTitle}>방에서 퇴장되었습니다.</h2>
+        <p className={styles.endedSub}>방장에 의해 강퇴되었습니다.</p>
+        <button className={styles.endedBtn} onClick={() => navigate('/')}>처음으로</button>
+      </div>
+    );
+  }
+
   if (ended) {
     return (
       <div className={styles.ended}>
@@ -93,13 +144,59 @@ export default function ChatRoomPage() {
       <div className={styles.roomHeader}>
         <div className={styles.roomMeta}>
           <span className={styles.roomNick}>🎭 {nickname}</span>
-          <span className={styles.roomCount}>
+          {isHost && <span className={styles.hostBadge}>방장</span>}
+          <button
+            className={`${styles.roomCount} ${showUsers ? styles.roomCountActive : ''}`}
+            onClick={() => setShowUsers((v) => !v)}
+            title="참여자 목록"
+          >
             {roomCount.currentCount} / {roomCount.maxCount}명
-          </span>
+          </button>
           {isWatching && <span className={styles.watchingBadge}>대기 중 (보기 전용)</span>}
         </div>
         <button className={styles.leaveBtn} onClick={() => navigate('/')}>퇴장</button>
       </div>
+
+      {showUsers && (
+        <div className={styles.usersPanel}>
+          <div className={styles.usersPanelHeader}>
+            <span>참여자 ({roomUsers.length}명)</span>
+            <button className={styles.closeBtn} onClick={() => setShowUsers(false)}>✕</button>
+          </div>
+          {roomUsers.map((u) => (
+            <div key={u.socketId} className={styles.userRow}>
+              <div className={styles.userInfo}>
+                <span className={styles.userNick}>{u.nickname}</span>
+                <div className={styles.userBadges}>
+                  {u.isHost && <span className={styles.hostTag}>방장</span>}
+                  {u.isWatching && <span className={styles.watchTag}>대기</span>}
+                  {u.nickname === nickname && <span className={styles.meTag}>나</span>}
+                </div>
+              </div>
+              {u.nickname !== nickname && !isWatching && (
+                <div className={styles.userActions}>
+                  <button
+                    className={styles.whisperBtn}
+                    onClick={() => { handleWhisperOpen(u); setShowUsers(false); }}
+                    title="귓속말"
+                  >
+                    🤫 귓속말
+                  </button>
+                  {isHost && !u.isHost && (
+                    <button
+                      className={styles.kickBtn}
+                      onClick={() => handleKick(u)}
+                      title="강퇴"
+                    >
+                      강퇴
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className={styles.messages}>
         {messages.length === 0 && (
@@ -154,6 +251,51 @@ export default function ChatRoomPage() {
           </>
         )}
       </div>
+
+      {whisperTarget && (
+        <div className={styles.modalOverlay} onClick={() => setWhisperTarget(null)}>
+          <div className={styles.whisperModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.whisperModalHeader}>
+              <span>🤫 {whisperTarget.nickname}님께 귓속말</span>
+              <span className={styles.whisperCount}>남은 횟수 {whisperRemaining}회</span>
+            </div>
+            <textarea
+              className={styles.whisperTextarea}
+              placeholder="귓속말 내용 (최대 140자)"
+              value={whisperInput}
+              onChange={(e) => setWhisperInput(e.target.value)}
+              maxLength={140}
+              rows={3}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleWhisperSend(); }
+              }}
+            />
+            <div className={styles.whisperModalFooter}>
+              <button className={styles.cancelBtn} onClick={() => setWhisperTarget(null)}>취소</button>
+              <button
+                className={`${styles.sendBtn} ${whisperInput.trim() ? styles.sendActive : ''}`}
+                onClick={handleWhisperSend}
+                disabled={!whisperInput.trim() || whisperRemaining <= 0}
+              >
+                보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {kickConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setKickConfirm(null)}>
+          <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.confirmText}>{kickConfirm.nickname}님을 강퇴하시겠습니까?</p>
+            <div className={styles.confirmBtns}>
+              <button className={styles.cancelBtn} onClick={() => setKickConfirm(null)}>취소</button>
+              <button className={styles.kickConfirmBtn} onClick={confirmKick}>강퇴</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
