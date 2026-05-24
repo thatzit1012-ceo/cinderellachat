@@ -10,11 +10,16 @@ jobs:
 
     steps:
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v0.1.10
         with:
-          host:        ${{ secrets.EC2_HOST }}
-          username:    ubuntu
-          key:         ${{ secrets.EC2_SSH_KEY }}
+          host:     ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          port:     22
           script: |
             cd /var/www/cinderellachat
-            ./deploy/deploy.sh
+            git pull origin main
+            cd server && npm install --omit=dev && cd ..
+            cd client && npm install --omit=dev && npm run build && cd ..
+            pm2 restart cinderellachat-server
+            sudo nginx -t && sudo systemctl reload nginx
