@@ -9,7 +9,13 @@ async function startRedisSubscriber(io) {
   }
 
   try {
-    subscriber = createClient({ url: process.env.REDIS_URL });
+    subscriber = createClient({
+      url: process.env.REDIS_URL,
+      socket: {
+        tls: process.env.REDIS_URL?.startsWith('rediss://'),
+        rejectUnauthorized: false,
+      },
+    });
     subscriber.on('error', (err) => console.error('[Redis] subscriber error:', err.message));
     await subscriber.connect();
 
