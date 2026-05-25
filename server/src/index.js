@@ -9,6 +9,7 @@ const nicknameRoutes = require('./routes/nickname');
 const adminRoutes = require('./routes/admin');
 const registerSocketHandlers = require('./socket/handlers');
 const { startRedisSubscriber } = require('./redis/subscriber');
+const { startQuestionCron } = require('./utils/questionCron');
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +33,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 registerSocketHandlers(io);
 startRedisSubscriber(io);
+startQuestionCron();
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS question_sets (
   set_id        SERIAL PRIMARY KEY,
   session_id    DATE NOT NULL REFERENCES sessions(session_id) ON DELETE CASCADE,
   questions     JSONB NOT NULL,
+  source        VARCHAR(20) NOT NULL DEFAULT 'manual',
   approved_by   VARCHAR(50),
   approved_at   TIMESTAMP,
   is_active     BOOLEAN NOT NULL DEFAULT FALSE,

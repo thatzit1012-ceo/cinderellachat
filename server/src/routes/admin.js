@@ -4,6 +4,7 @@ const pool = require('../db/pool');
 const { adminAuth, ADMIN_PASSWORD, ADMIN_TOKEN_SECRET } = require('../middleware/adminAuth');
 const { getKSTDateString } = require('../utils/time');
 const { DEFAULT_QUESTIONS } = require('../db/defaultQuestions');
+const { generateAndSave } = require('../utils/questionCron');
 
 // ── POST /api/admin/login ────────────────────────────────────
 router.post('/login', (req, res) => {
@@ -63,6 +64,23 @@ router.get('/questions/candidates', adminAuth, async (req, res) => {
   } catch (err) {
     console.error('admin/questions/candidates error:', err.message);
     res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ── POST /api/admin/questions/generate ───────────────────────
+// Claude API로 질문 온디맨드 생성
+router.post('/questions/generate', adminAuth, async (req, res) => {
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.status(503).json({ error: 'ANTHROPIC_API_KEY not configured' });
+    }
+    const { date } = req.body;
+    const targetDate = date || getKSTDateString();
+    const saved = await generateAndSave(targetDate);
+    res.json({ generated: saved });
+  } catch (err) {
+    console.error('admin/questions/generate error:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

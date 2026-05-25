@@ -162,6 +162,22 @@
 
 .resetBtn:hover { border-color: var(--danger); color: var(--danger); }
 
+.aiBtn {
+  padding: 8px 16px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: all 0.2s;
+}
+
+.aiBtn:hover { background: rgba(201,168,76,0.25); }
+.aiBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── 에디터 ── */
 .editor {
   display: flex;

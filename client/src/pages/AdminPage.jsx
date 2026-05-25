@@ -193,6 +193,7 @@ function AdminPanel({ token }) {
   const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
@@ -253,6 +254,26 @@ function AdminPanel({ token }) {
       setStatus(`저장 오류: ${err.message}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    setStatus('');
+    try {
+      const res = await fetch(`${SERVER_URL}/api/admin/questions/generate`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ date: targetDate }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      await loadCandidates();
+      setStatus('🤖 AI 질문 생성 완료! 검토 후 최종 승인하세요.');
+    } catch (err) {
+      setStatus(`생성 오류: ${err.message}`);
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -326,12 +347,21 @@ function AdminPanel({ token }) {
                 >
                   {candidates.map((c) => (
                     <option key={c.set_id} value={c.set_id}>
-                      세트 #{c.set_id} {c.is_active ? '✓ 승인됨' : '(미승인)'}
+                      세트 #{c.set_id} {c.source === 'ai' ? '🤖 AI' : ''} {c.is_active ? '✓ 승인됨' : '(미승인)'}
                     </option>
                   ))}
                 </select>
               </div>
             )}
+
+            <button
+              className={styles.aiBtn}
+              onClick={handleGenerate}
+              disabled={generating}
+              title="Claude AI로 오늘의 질문 자동 생성"
+            >
+              {generating ? '⏳ 생성 중...' : '🤖 AI로 생성'}
+            </button>
 
             <button className={styles.resetBtn} onClick={() => { setEditingQuestions(defaultQs); setSelectedSetId(null); }}>
               디폴트로 초기화
