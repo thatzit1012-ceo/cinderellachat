@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useServiceState } from '../hooks/useServiceState';
 import { useSocket } from '../hooks/useSocket';
+import { useT } from '../i18n/useT';
 import CountdownBar from '../components/CountdownBar';
 import styles from './ChatRoomPage.module.css';
 
@@ -26,6 +27,7 @@ function detectBrowserLang() {
 
 export default function ChatRoomPage() {
   const navigate = useNavigate();
+  const { t } = useT();
   const { remaining } = useServiceState();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -84,11 +86,11 @@ export default function ChatRoomPage() {
       setMessages((prev) => prev.map((m) => m.id === id ? { ...m, translations } : m));
     },
     onUserJoined: ({ nickname: n, isWatching: w }) =>
-      addSystemMsg(`${n}님이 ${w ? '대기자로 ' : ''}입장했습니다.`),
+      addSystemMsg(`${n}${w ? t('sysJoinedWatching') : t('sysJoined')}`),
     onUserLeft: ({ nickname: n }) =>
-      addSystemMsg(`${n}님이 퇴장했습니다.`),
+      addSystemMsg(`${n}${t('sysLeft')}`),
     onWatcherPromoted: ({ nickname: n }) => {
-      addSystemMsg(`${n}님이 대기에서 참여자로 전환됐습니다.`);
+      addSystemMsg(`${n}${t('sysPromoted')}`);
       if (n === nickname) setIsWatching(false);
     },
     onCountUpdated: ({ currentCount, maxCount }) =>
@@ -130,7 +132,7 @@ export default function ChatRoomPage() {
   const handleWhisperSend = () => {
     if (!whisperInput.trim() || !whisperTarget) return;
     sendWhisper(whisperTarget.socketId, whisperInput.trim());
-    addSystemMsg(`귓속말을 ${whisperTarget.nickname}님께 보냈습니다. (남은 횟수: ${whisperRemaining - 1}회)`);
+    addSystemMsg(t('sysWhisperSent')(whisperTarget.nickname, whisperRemaining - 1));
     setWhisperTarget(null);
     setWhisperInput('');
   };
@@ -142,7 +144,7 @@ export default function ChatRoomPage() {
   const confirmKick = () => {
     if (!kickConfirm) return;
     sendKick(kickConfirm.socketId);
-    addSystemMsg(`${kickConfirm.nickname}님을 강퇴했습니다.`);
+    addSystemMsg(t('sysKicked')(kickConfirm.nickname));
     setKickConfirm(null);
   };
 
@@ -165,9 +167,9 @@ export default function ChatRoomPage() {
   if (kicked) {
     return (
       <div className={styles.ended}>
-        <h2 className={styles.endedTitle}>방에서 퇴장되었습니다.</h2>
-        <p className={styles.endedSub}>방장에 의해 강퇴되었습니다.</p>
-        <button className={styles.endedBtn} onClick={() => navigate('/')}>처음으로</button>
+        <h2 className={styles.endedTitle}>{t('kickedTitle')}</h2>
+        <p className={styles.endedSub}>{t('kickedSub')}</p>
+        <button className={styles.endedBtn} onClick={() => navigate('/')}>{t('goHome')}</button>
       </div>
     );
   }
@@ -175,9 +177,9 @@ export default function ChatRoomPage() {
   if (ended) {
     return (
       <div className={styles.ended}>
-        <h2 className={styles.endedTitle}>오늘의 무도회가 끝났습니다.</h2>
-        <p className={styles.endedSub}>모든 채팅이 사라졌습니다. 내일 오전 7시에 다시 만나요.</p>
-        <button className={styles.endedBtn} onClick={() => navigate('/')}>처음으로</button>
+        <h2 className={styles.endedTitle}>{t('endedTitle')}</h2>
+        <p className={styles.endedSub}>{t('endedSub')}</p>
+        <button className={styles.endedBtn} onClick={() => navigate('/')}>{t('goHome')}</button>
       </div>
     );
   }
@@ -189,15 +191,15 @@ export default function ChatRoomPage() {
       <div className={styles.roomHeader}>
         <div className={styles.roomMeta}>
           <span className={styles.roomNick}>🎭 {nickname}</span>
-          {isHost && <span className={styles.hostBadge}>방장</span>}
+          {isHost && <span className={styles.hostBadge}>{t('hostBadge')}</span>}
           <button
             className={`${styles.roomCount} ${showUsers ? styles.roomCountActive : ''}`}
             onClick={() => setShowUsers((v) => !v)}
-            title="참여자 목록"
+            title={t('participants')}
           >
-            {roomCount.currentCount} / {roomCount.maxCount}명
+            {roomCount.currentCount} / {roomCount.maxCount}{t('people')}
           </button>
-          {isWatching && <span className={styles.watchingBadge}>대기 중 (보기 전용)</span>}
+          {isWatching && <span className={styles.watchingBadge}>{t('watchingBadge')}</span>}
         </div>
         <div className={styles.headerRight}>
           <div className={styles.langSelector}>
@@ -222,14 +224,14 @@ export default function ChatRoomPage() {
               </div>
             )}
           </div>
-          <button className={styles.leaveBtn} onClick={() => navigate('/')}>퇴장</button>
+          <button className={styles.leaveBtn} onClick={() => navigate('/')}>{t('leave')}</button>
         </div>
       </div>
 
       {showUsers && (
         <div className={styles.usersPanel}>
           <div className={styles.usersPanelHeader}>
-            <span>참여자 ({roomUsers.length}명)</span>
+            <span>{t('participants')} ({roomUsers.length}{t('people')})</span>
             <button className={styles.closeBtn} onClick={() => setShowUsers(false)}>✕</button>
           </div>
           {roomUsers.map((u) => (
@@ -237,9 +239,9 @@ export default function ChatRoomPage() {
               <div className={styles.userInfo}>
                 <span className={styles.userNick}>{u.nickname}</span>
                 <div className={styles.userBadges}>
-                  {u.isHost && <span className={styles.hostTag}>방장</span>}
-                  {u.isWatching && <span className={styles.watchTag}>대기</span>}
-                  {u.nickname === nickname && <span className={styles.meTag}>나</span>}
+                  {u.isHost && <span className={styles.hostTag}>{t('hostTag')}</span>}
+                  {u.isWatching && <span className={styles.watchTag}>{t('watchTag')}</span>}
+                  {u.nickname === nickname && <span className={styles.meTag}>{t('meTag')}</span>}
                 </div>
               </div>
               {u.nickname !== nickname && !isWatching && (
@@ -247,17 +249,15 @@ export default function ChatRoomPage() {
                   <button
                     className={styles.whisperBtn}
                     onClick={() => { handleWhisperOpen(u); setShowUsers(false); }}
-                    title="귓속말"
                   >
-                    🤫 귓속말
+                    {t('whisperBtn')}
                   </button>
                   {isHost && !u.isHost && (
                     <button
                       className={styles.kickBtn}
                       onClick={() => handleKick(u)}
-                      title="강퇴"
                     >
-                      강퇴
+                      {t('kickBtn')}
                     </button>
                   )}
                 </div>
@@ -269,7 +269,7 @@ export default function ChatRoomPage() {
 
       <div className={styles.messages}>
         {messages.length === 0 && (
-          <p className={styles.empty}>첫 번째로 말을 걸어보세요.</p>
+          <p className={styles.empty}>{t('emptyChat')}</p>
         )}
         {messages.map((msg) =>
           msg.system ? (
@@ -295,12 +295,12 @@ export default function ChatRoomPage() {
 
       <div className={`${styles.inputArea} ${isWatching ? styles.watchingInput : ''}`}>
         {isWatching ? (
-          <p className={styles.watchingNote}>대기 중에는 메시지를 보낼 수 없습니다. 자리가 나면 자동으로 참여자로 전환됩니다.</p>
+          <p className={styles.watchingNote}>{t('watchingNote')}</p>
         ) : (
           <>
             <textarea
               className={styles.textInput}
-              placeholder="메시지 입력... (최대 140자, Enter로 전송)"
+              placeholder={t('messageInput')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -314,7 +314,7 @@ export default function ChatRoomPage() {
                 onClick={handleSend}
                 disabled={!input.trim()}
               >
-                전송
+                {t('send')}
               </button>
             </div>
           </>
@@ -325,12 +325,12 @@ export default function ChatRoomPage() {
         <div className={styles.modalOverlay} onClick={() => setWhisperTarget(null)}>
           <div className={styles.whisperModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.whisperModalHeader}>
-              <span>🤫 {whisperTarget.nickname}님께 귓속말</span>
-              <span className={styles.whisperCount}>남은 횟수 {whisperRemaining}회</span>
+              <span>🤫 {whisperTarget.nickname}{t('whisperTo')}</span>
+              <span className={styles.whisperCount}>{t('whisperRemaining')} {whisperRemaining}{t('whisperTimes')}</span>
             </div>
             <textarea
               className={styles.whisperTextarea}
-              placeholder="귓속말 내용 (최대 140자)"
+              placeholder={t('whisperPlaceholder')}
               value={whisperInput}
               onChange={(e) => setWhisperInput(e.target.value)}
               maxLength={140}
@@ -341,13 +341,13 @@ export default function ChatRoomPage() {
               }}
             />
             <div className={styles.whisperModalFooter}>
-              <button className={styles.cancelBtn} onClick={() => setWhisperTarget(null)}>취소</button>
+              <button className={styles.cancelBtn} onClick={() => setWhisperTarget(null)}>{t('cancel')}</button>
               <button
                 className={`${styles.sendBtn} ${whisperInput.trim() ? styles.sendActive : ''}`}
                 onClick={handleWhisperSend}
                 disabled={!whisperInput.trim() || whisperRemaining <= 0}
               >
-                보내기
+                {t('whisperSend')}
               </button>
             </div>
           </div>
@@ -357,10 +357,10 @@ export default function ChatRoomPage() {
       {kickConfirm && (
         <div className={styles.modalOverlay} onClick={() => setKickConfirm(null)}>
           <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.confirmText}>{kickConfirm.nickname}님을 강퇴하시겠습니까?</p>
+            <p className={styles.confirmText}>{t('kickConfirm')(kickConfirm.nickname)}</p>
             <div className={styles.confirmBtns}>
-              <button className={styles.cancelBtn} onClick={() => setKickConfirm(null)}>취소</button>
-              <button className={styles.kickConfirmBtn} onClick={confirmKick}>강퇴</button>
+              <button className={styles.cancelBtn} onClick={() => setKickConfirm(null)}>{t('cancel')}</button>
+              <button className={styles.kickConfirmBtn} onClick={confirmKick}>{t('kickConfirmBtn')}</button>
             </div>
           </div>
         </div>

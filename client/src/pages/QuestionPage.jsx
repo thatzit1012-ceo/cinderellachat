@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 import styles from './QuestionPage.module.css';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000';
 
 export default function QuestionPage() {
   const navigate = useNavigate();
+  const { t, lang } = useT();
   const [questions, setQuestions] = useState([]);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -37,10 +39,11 @@ export default function QuestionPage() {
     }
   };
 
-  if (loading) return <div className={styles.loading}>무도회를 준비하고 있습니다...</div>;
+  if (loading) return <div className={styles.loading}>{t('loadingBall')}</div>;
 
   const q = questions[step];
   const progress = ((step) / questions.length) * 100;
+  const qText = (item) => lang === 'en' && item.text_en ? item.text_en : item.text_ko;
 
   return (
     <div className={styles.page}>
@@ -53,8 +56,8 @@ export default function QuestionPage() {
       </div>
 
       <div className={styles.content}>
-        <p className={styles.qLabel}>오늘의 질문 {step + 1}</p>
-        <h2 className={styles.question}>{q.text_ko}</h2>
+        <p className={styles.qLabel}>{t('questionLabel')} {step + 1}</p>
+        <h2 className={styles.question}>{qText(q)}</h2>
 
         <div className={styles.options}>
           {q.options.map((opt) => (
@@ -64,7 +67,7 @@ export default function QuestionPage() {
               onClick={() => handleSelect(q.id, opt.code)}
             >
               <span className={styles.optCode}>{opt.code}</span>
-              <span className={styles.optText}>{opt.text_ko}</span>
+              <span className={styles.optText}>{qText(opt)}</span>
             </button>
           ))}
         </div>

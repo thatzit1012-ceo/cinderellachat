@@ -1,9 +1,11 @@
 import { formatTime } from '../utils/time';
+import { useT } from '../i18n/useT';
 import styles from './CountdownTimer.module.css';
 
 export default function CountdownTimer({ remaining, state }) {
+  const { t } = useT();
   const { h, m, s } = formatTime(remaining);
-  const label = state === 'open' ? '자정 소멸까지' : '무도회 입장까지';
+  const label = state === 'open' ? t('untilMidnight') : t('untilOpen');
 
   return (
     <div className={`${styles.wrap} ${state === 'open' ? styles.open : styles.waiting}`}>

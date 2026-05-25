@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '../i18n/useT';
 import styles from './NicknamePage.module.css';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000';
 
 export default function NicknamePage() {
   const navigate = useNavigate();
+  const { t } = useT();
   const [nickname, setNickname] = useState('');
   const [status, setStatus] = useState('idle'); // idle | checking | available | taken | invalid
   const [roomInfo, setRoomInfo] = useState(null);
@@ -56,27 +58,27 @@ export default function NicknamePage() {
 
   const statusMsg = {
     idle: '',
-    checking: '확인 중...',
-    available: '✓ 사용 가능한 닉네임입니다.',
-    taken: '이미 이 방에서 사용 중인 닉네임입니다.',
-    invalid: '닉네임은 2자 이상이어야 합니다.',
+    checking: t('statusChecking'),
+    available: t('statusAvailable'),
+    taken: t('statusTaken'),
+    invalid: t('statusInvalid'),
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.content}>
-        <button className={styles.back} onClick={() => navigate('/questions')}>← 돌아가기</button>
+        <button className={styles.back} onClick={() => navigate('/questions')}>{t('back')}</button>
 
         <div className={styles.top}>
-          <h2 className={styles.title}>닉네임을 정해주세요</h2>
-          <p className={styles.desc}>오늘 하루만 사용할 가면입니다. 자정에 사라집니다.</p>
+          <h2 className={styles.title}>{t('nicknameTitle')}</h2>
+          <p className={styles.desc}>{t('nicknameDesc')}</p>
         </div>
 
         <div className={styles.inputWrap}>
           <input
             className={styles.input}
             type="text"
-            placeholder="닉네임 입력 (최대 20자)"
+            placeholder={t('nicknamePlaceholder')}
             value={nickname}
             onChange={handleChange}
             maxLength={20}
@@ -89,12 +91,12 @@ export default function NicknamePage() {
 
         {roomInfo && (
           <div className={styles.roomPreview}>
-            <p className={styles.roomLabel}>배정될 채팅방</p>
+            <p className={styles.roomLabel}>{t('roomPreviewLabel')}</p>
             <p className={styles.roomInfo}>
-              현재 입장 인원 <strong>{roomInfo.currentCount}</strong> / {roomInfo.maxCount}명
+              {t('roomCurrentCount')} <strong>{roomInfo.currentCount}</strong> / {roomInfo.maxCount}{t('people')}
             </p>
             {roomInfo.currentCount >= roomInfo.maxCount && (
-              <p className={styles.watchingNotice}>⚠ 방이 꽉 찼습니다. 대기(보기 전용) 모드로 입장합니다.</p>
+              <p className={styles.watchingNotice}>{t('roomFull')}</p>
             )}
           </div>
         )}
@@ -104,7 +106,7 @@ export default function NicknamePage() {
           onClick={handleEnter}
           disabled={status !== 'available'}
         >
-          ✦ 무도회 입장
+          {t('enterBtn')}
         </button>
       </div>
     </div>
