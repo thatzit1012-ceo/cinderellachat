@@ -5,6 +5,25 @@ import { useSocket } from '../hooks/useSocket';
 import CountdownBar from '../components/CountdownBar';
 import styles from './ChatRoomPage.module.css';
 
+const LANGUAGES = [
+  { code: 'ko', label: '한국어', flag: '🇰🇷' },
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'ja', label: '日本語', flag: '🇯🇵' },
+  { code: 'zh-CN', label: '中文', flag: '🇨🇳' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'th', label: 'ภาษาไทย', flag: '🇹🇭' },
+];
+
+function detectBrowserLang() {
+  const bl = navigator.language || 'en';
+  if (bl.startsWith('ko')) return 'ko';
+  if (bl.startsWith('ja')) return 'ja';
+  if (bl.startsWith('zh')) return 'zh-CN';
+  if (bl.startsWith('es')) return 'es';
+  if (bl.startsWith('th')) return 'th';
+  return 'en';
+}
+
 export default function ChatRoomPage() {
   const navigate = useNavigate();
   const { remaining } = useServiceState();
@@ -20,6 +39,8 @@ export default function ChatRoomPage() {
   const [whisperRemaining, setWhisperRemaining] = useState(5);
   const [kicked, setKicked] = useState(false);
   const [kickConfirm, setKickConfirm] = useState(null);
+  const [langPref, setLangPref] = useState(() => localStorage.getItem('cc_lang') || detectBrowserLang());
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const bottomRef = useRef(null);
 
   const nickname  = sessionStorage.getItem('cc_nickname') || '';
@@ -47,6 +68,7 @@ export default function ChatRoomPage() {
         id: m.message_id,
         nickname: m.nickname,
         content: m.content,
+        translations: m.translations || {},
         createdAt: m.created_at,
         isWhisper: m.is_whisper,
       })));
@@ -56,7 +78,10 @@ export default function ChatRoomPage() {
       if (msg.isWhisper && msg.remainingCount !== undefined) {
         setWhisperRemaining(msg.remainingCount);
       }
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => [...prev, { ...msg, translations: msg.translations || {} }]);
+    },
+    onTranslated: ({ id, translations }) => {
+      setMessages((prev) => prev.map((m) => m.id === id ? { ...m, translations } : m));
     },
     onUserJoined: ({ nickname: n, isWatching: w }) =>
       addSystemMsg(`${n}님이 ${w ? '대기자로 ' : ''}입장했습니다.`),
@@ -76,6 +101,13 @@ export default function ChatRoomPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (!showLangMenu) return;
+    const close = () => setShowLangMenu(false);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [showLangMenu]);
 
   const handleSend = () => {
     if (!input.trim() || isWatching) return;
@@ -117,6 +149,19 @@ export default function ChatRoomPage() {
   const myInfo = roomUsers.find((u) => u.nickname === nickname);
   const isHost = myInfo?.isHost || false;
 
+  const handleLangSelect = (code) => {
+    setLangPref(code);
+    localStorage.setItem('cc_lang', code);
+    setShowLangMenu(false);
+  };
+
+  const displayContent = (msg) => {
+    if (langPref === 'ko' || !msg.translations) return msg.content;
+    return msg.translations[langPref] || msg.content;
+  };
+
+  const currentLang = LANGUAGES.find((l) => l.code === langPref);
+
   if (kicked) {
     return (
       <div className={styles.ended}>
@@ -154,7 +199,31 @@ export default function ChatRoomPage() {
           </button>
           {isWatching && <span className={styles.watchingBadge}>대기 중 (보기 전용)</span>}
         </div>
-        <button className={styles.leaveBtn} onClick={() => navigate('/')}>퇴장</button>
+        <div className={styles.headerRight}>
+          <div className={styles.langSelector}>
+            <button
+              className={styles.langBtn}
+              onClick={() => setShowLangMenu((v) => !v)}
+              title="언어 선택"
+            >
+              {currentLang?.flag} {currentLang?.label}
+            </button>
+            {showLangMenu && (
+              <div className={styles.langMenu}>
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className={`${styles.langOption} ${langPref === lang.code ? styles.langActive : ''}`}
+                    onClick={() => handleLangSelect(lang.code)}
+                  >
+                    {lang.flag} {lang.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button className={styles.leaveBtn} onClick={() => navigate('/')}>퇴장</button>
+        </div>
       </div>
 
       {showUsers && (
@@ -213,7 +282,7 @@ export default function ChatRoomPage() {
               {msg.nickname !== nickname && (
                 <span className={styles.msgNick}>{msg.nickname}{msg.isWhisper ? ' 🤫' : ''}</span>
               )}
-              <div className={styles.bubble}>{msg.content}</div>
+              <div className={styles.bubble}>{displayContent(msg)}</div>
               <span className={styles.msgTime}>
                 {new Date(msg.createdAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 {msg.isWhisper && <span className={styles.whisperLabel}> 귓속말</span>}

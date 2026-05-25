@@ -5,7 +5,7 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000';
 
 export function useSocket({
   roomId, userToken, nickname,
-  onHistory, onMessage, onUserJoined, onUserLeft,
+  onHistory, onMessage, onTranslated, onUserJoined, onUserLeft,
   onWatcherPromoted, onCountUpdated, onMidnight,
   onUsersList, onKicked,
 }) {
@@ -21,6 +21,7 @@ export function useSocket({
 
     socket.on('room:history',          onHistory);
     socket.on('message:receive',       onMessage);
+    socket.on('message:translated',    onTranslated);
     socket.on('whisper:receive',       onMessage);
     socket.on('room:user_joined',      onUserJoined);
     socket.on('room:user_left',        onUserLeft);

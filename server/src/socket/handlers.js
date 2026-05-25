@@ -12,9 +12,11 @@ const {
   getHostOfRoom,
   incrementWhisperCount,
   saveMessage,
+  updateMessageTranslations,
   getRecentMessages,
 } = require('../db/queries');
 const { getKSTDateString } = require('../utils/time');
+const { translateToAll } = require('../utils/translate');
 
 // socketId → { userToken, roomId, nickname, isWatching } 매핑 (메모리)
 const socketMap = new Map();
@@ -96,9 +98,17 @@ function registerSocketHandlers(io) {
           id: msg.message_id,
           nickname,
           content: trimmed,
+          translations: {},
           createdAt: msg.created_at,
           isWhisper: false,
         });
+
+        // 백그라운드 번역 (메시지 전송 속도에 영향 없음)
+        translateToAll(trimmed).then(async (translations) => {
+          if (Object.keys(translations).length === 0) return;
+          await updateMessageTranslations(msg.message_id, translations);
+          io.to(roomId).emit('message:translated', { id: msg.message_id, translations });
+        }).catch((err) => console.error('translate error:', err.message));
       } catch (err) {
         console.error('message:send error:', err.message);
       }

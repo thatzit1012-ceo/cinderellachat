@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS messages (
   user_token    UUID NOT NULL,
   nickname      VARCHAR(20) NOT NULL,
   content       TEXT NOT NULL,
+  translations  JSONB NOT NULL DEFAULT '{}',
   is_whisper    BOOLEAN NOT NULL DEFAULT FALSE,
   target_token  UUID,
   created_at    TIMESTAMP NOT NULL DEFAULT NOW()

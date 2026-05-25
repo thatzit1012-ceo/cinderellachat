@@ -145,6 +145,13 @@ async function saveMessage(roomId, userToken, nickname, content, isWhisper = fal
   return result.rows[0];
 }
 
+async function updateMessageTranslations(messageId, translations) {
+  await pool.query(
+    'UPDATE messages SET translations = $1 WHERE message_id = $2',
+    [JSON.stringify(translations), messageId]
+  );
+}
+
 async function getRecentMessages(roomId, limit = 50) {
   const result = await pool.query(
     `SELECT * FROM messages
@@ -176,6 +183,6 @@ module.exports = {
   getOrCreateRoom, getRoomById, incrementRoomCount, decrementRoomCount,
   createUser, getUserByToken, setUserLeft, isNicknameTaken,
   getFirstWatchingUser, promoteWatcher, getHostOfRoom, incrementWhisperCount,
-  saveMessage, getRecentMessages,
+  saveMessage, updateMessageTranslations, getRecentMessages,
   saveAnalytics,
 };
